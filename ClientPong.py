@@ -38,7 +38,8 @@ class PongClient:
             'player1_score': 0,
             'player2_score': 0,
             'game_started': False,
-            'countdown': 3
+            'countdown': 3,
+            'winner': None
         }
         
         # Conectar al servidor
@@ -169,6 +170,16 @@ class PongClient:
             self.game_state = pickle.loads(data)
         except:
             pass
+
+    def check_winner(self):
+        # Verificar si el estado del juego tiene un ganador
+        if self.game_state['winner'] is not None:
+            winner_text = self.game_font.render(f"Player {self.game_state['winner']} wins!", False, self.light_grey)
+            self.screen.blit(winner_text, (self.screen_width//2-130, self.screen_height//2+150))
+            pygame.display.flip()
+            pygame.time.delay(3000)  # Mostrar el mensaje durante 3 segundos
+            return True
+        return False
     
     def draw_game(self):
         # Fondo
@@ -189,11 +200,16 @@ class PongClient:
         self.screen.blit(player1_text, (480, 290))
         player2_text = self.game_font.render(f"{self.game_state['player2_score']}", False, self.light_grey)
         self.screen.blit(player2_text, (400, 290))
+
         
         # Cuenta regresiva si el juego no ha comenzado
         if not self.game_state['game_started'] and 'countdown' in self.game_state:
             countdown_text = self.game_font.render(f"{self.game_state['countdown']}", False, self.light_grey)
             self.screen.blit(countdown_text, (self.screen_width/2 - 10, self.screen_height/2 + 70))
+
+        if self.game_state['winner'] == 1 or self.game_state['winner'] == 2:
+            winner_text = self.game_font.render(f"Winner", False, self.light_grey)
+            self.screen.blit(winner_text, (400, 290))
     
     def run(self):
         running = True
@@ -223,6 +239,10 @@ class PongClient:
             # Recibir estado actualizado del juego
             self.receive_game_state()
             
+            # Comprobar si hay un ganador
+            if self.check_winner():
+                break
+            
             self.draw_game()
             
             # Actualizar pantalla
@@ -235,7 +255,7 @@ class PongClient:
         sys.exit()
 
 if __name__ == "__main__":
-    host = 'localhost' 
+    host = '172.17.44.38' 
     port = 5000  
     
     # Manejo de argumentos de línea de comandos
