@@ -7,7 +7,7 @@ import time
 from threading import Thread
 
 class PongServer:
-    def __init__(self, host='localhost', port=5000):
+    def __init__(self, host='172.17.44.38', port=5000):
         self.host = host
         self.port = port
         
@@ -39,7 +39,8 @@ class PongServer:
             'player1_score': self.player1_score,
             'player2_score': self.player2_score,
             'game_started': False,
-            'countdown': 3
+            'countdown': 3,
+            'winner': None
         }
         
         self.is_running = True # Control del bucle principal
@@ -57,11 +58,15 @@ class PongServer:
         if self.ball.left <= 0:
             self.player1_score += 1
             self.ball_restart()
+            if self.player1_score >= 5:
+                self.game_state['winner'] = 1
             
         # Punto para jugador 2 (pelota sale por la derecha)
         if self.ball.right >= self.screen_width:
             self.player2_score += 1
             self.ball_restart()
+            if self.player2_score >= 5:
+                self.game_state['winner'] = 2
             
         # Colisiones con los jugadores
         if self.ball.colliderect(self.player1) and self.ball_speed_x > 0:
